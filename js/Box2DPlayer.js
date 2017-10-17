@@ -184,28 +184,36 @@ if(this.level==1){
             moveSquY = 784;
             gravityDirection = 90;
         }else if(sideNum==1 && this.spawnpoint == 4){ // gravity down
-            moveSquX = 921;
-            moveSquY = 455;
+            moveSquX = 1129;
+            moveSquY = 594;
             gravityDirection = 90;
         }else if(sideNum==2 && this.spawnpoint == 1){ // gravity to the right
-            moveSquX = 722;
-            moveSquY = 665;
+            moveSquX = 1175;
+            moveSquY = 690;
+            gravityDirection = 0;
+        }else if(sideNum==2 && this.spawnpoint == 5){ // gravity to the right
+            moveSquX = 695;
+            moveSquY = 600;
+            gravityDirection = 0;
+        }else if(sideNum==2 && this.spawnpoint == 7){ // gravity to the right
+            moveSquX = 723;
+            moveSquY = 450;
+            gravityDirection = 0;
+        }else if(sideNum==2 && this.spawnpoint == 8){ // gravity to the right
+            moveSquX = 1190;
+            moveSquY = 630;
             gravityDirection = 0;
         }else if(sideNum==3 && this.spawnpoint == 2){ // gravity to the right
-            moveSquX = 770;
-            moveSquY = 688;
-            gravityDirection = 270;
-        }else if(sideNum==3 && this.spawnpoint == 6){ // gravity to the right
-            moveSquX = 974;
-            moveSquY = 685;
+            moveSquX = 655;
+            moveSquY = 694;
             gravityDirection = 270;
         }else if(sideNum==4 && this.spawnpoint == 3){ // gravity to the right
-            moveSquX = 725;
-            moveSquY = 415;
+            moveSquX = 670;
+            moveSquY = 714;
             gravityDirection = 180;
-        }else if(sideNum==4 && this.spawnpoint == 5){ // gravity to the right
-            moveSquX = 1080;
-            moveSquY = 720;
+        }else if(sideNum==4 && this.spawnpoint == 6){ // gravity to the right
+            moveSquX = 1100;
+            moveSquY = 491;
             gravityDirection = 180;
         }
         this.playerMoved = false;

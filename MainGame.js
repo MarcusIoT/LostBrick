@@ -9,8 +9,15 @@ var level = 0; // 1 = first test; 2 = first good level; 3 = second good level
 var gamemode = "menu";
 var sideNum = 1;
 
+/** 
+ * presentation mode 
+ * (for different input from makey makey than from keyboard
+ * and game is also muted)
+ */ 
+var presentationmode = false;
+
 // if muted (true) music does not play
-var mute = false;
+var mute = false;   
 
 // test mode
 var godmode = false;
@@ -103,10 +110,12 @@ var videohardendtomenu;
 
 var ltwovideointrohard;
 var ltwovideo12;
-var ltwovideo23;
+var ltwovideo12low;
+var ltwovideo24;
 var ltwovideo34
 var ltwovideo14;
 var ltwovideo41;
+var ltwovideo42;
 var ltwovideo43;
 var ltwovideo32;
 var ltwovideo21;
@@ -120,9 +129,9 @@ var prevImg = 0;
 var whichVideo = "no";
 
 // for menu text
-var menuopacityleft = 0.6;
-var menuopacityright = 0.6;
-var menutextgrowing = true;
+var menuopacityleft = 0;
+var menuopacityright = 0;
+var menutextchange = 0;
 
 // for end (result)
 var resultTime = 0;
@@ -132,6 +141,11 @@ var endvideoplayed = 0;
 var endtomenu = true;
 var endtomenushown = true;
 var endtomenutime = 0
+
+// for end text
+var endopacityleft = 0;
+var endopacityright = 0;
+var endtextchange = 0;
 
 // for intro
 var introStarted = false;
@@ -149,7 +163,7 @@ function onReady() {
 
     // backgroundmusic easy
     backgroundmusicone = document.createElement('AUDIO');
-    backgroundmusicone.src="level1/music/backgroundone.mp3";
+    backgroundmusicone.src="level1/music/backgroundtwo.mp3";
 
     // import of all needed videos easy
     videointroeasy = document.createElement('video');
@@ -235,7 +249,7 @@ function onReady() {
 
     // backgroundmusic level 3
     ltwobackgroundmusicthree = document.createElement('AUDIO');
-    ltwobackgroundmusicthree.src="level3/music/backgroundone.mp3";
+    ltwobackgroundmusicthree.src="level3/music/backgroundtwo.mp3";
 
     // import of all needed videos hard
     ltwovideointrohard = document.createElement('video');
@@ -243,12 +257,16 @@ function onReady() {
     ltwovideointrohard.load();
 
     ltwovideo12 = document.createElement('video');
-    video12.src =  "level3/videos/side1-2.mp4";
-    video12.load();
+    ltwovideo12.src =  "level3/videos/side1-2.mp4";
+    ltwovideo12.load();
 
-    ltwovideo23 = document.createElement('video');
-    ltwovideo23.src =  "level3/videos/side2-3.mp4";
-    ltwovideo23.load();
+    ltwovideo12low = document.createElement('video');
+    ltwovideo12low.src =  "level3/videos/side1-2low.mp4";
+    ltwovideo12low.load();
+
+    ltwovideo24 = document.createElement('video');
+    ltwovideo24.src =  "level3/videos/side2-4.mp4";
+    ltwovideo24.load();
 
     ltwovideo34 = document.createElement('video');
     ltwovideo34.src =  "level3/videos/side3-4.mp4";
@@ -265,6 +283,10 @@ function onReady() {
     ltwovideo43 = document.createElement('video');
     ltwovideo43.src =  "level3/videos/side4-3.mp4";
     ltwovideo43.load();
+
+    ltwovideo42 = document.createElement('video');
+    ltwovideo42.src =  "level3/videos/side4-2.mp4";
+    ltwovideo42.load();
 
     ltwovideo32 = document.createElement('video');
     ltwovideo32.src =  "level3/videos/side3-2.mp4";
@@ -284,13 +306,14 @@ function onReady() {
 
     playerX = 500;
     playerY = 500;
+
     // setup world
     world = new b2World(
         new b2Vec2(0, 0)    //gravity
-        ,  true              //allow sleep
+        ,  true             //allow sleep
     );
 
-    if(godmode==false){    // collision listener
+    if(godmode==false){     // collision listener
     var listener = new Box2D.Dynamics.b2ContactListener;
     listener.BeginContact = function (contact) {
         var a = contact.GetFixtureA().GetBody().GetUserData();
@@ -313,7 +336,7 @@ function draw () {
     var thisFrameTime = (thisLoop=new Date) - lastLoop;
     seconds = new Date().getTime() / 1000;
 
-    // setting player position for onload
+    // setting player position on first start
     if(!started){
         if(level==1){
             if(!mute)backgroundmusicone.play();
@@ -340,7 +363,7 @@ function draw () {
             }
             started=true;
         }else if(level==3){
-            if(!mute)backgroundmusicthree.play();
+            if(!mute)ltwobackgroundmusicthree.play();
             if(sideNum==1){
                 spawnpoint=0; // 0
             }else if(sideNum==2){
@@ -355,26 +378,30 @@ function draw () {
     }
 
     if(gamemode=="menu"){
-        if(menuopacityleft<=0.3){
-            menutextgrowing=true;
-        }else if(menuopacityleft>=0.9){
-            menutextgrowing=false;
-        }
-        if(menutextgrowing){
+        if(menutextchange==0){
             menuopacityleft+=0.005;
-            menuopacityright-=0.005;
-        }else{
+            if(menuopacityleft>=0.9)menutextchange=1;
+        }else if(menutextchange==1){
             menuopacityleft-=0.005;
+            if(menuopacityleft<=0.005)menutextchange=2;
+        }else if(menutextchange==2){
             menuopacityright+=0.005;
+            if(menuopacityright>=0.9)menutextchange=3;
+        }else if(menutextchange==3){
+            menuopacityright-=0.005;
+            if(menuopacityright<=0.005)menutextchange=0;
         }
         img = new Image();
         img.src = "mainimages/menu.jpg";
         ctx.drawImage(img, 0, 0);
         ctx.font = "normal 41px Roboto";
+        if(menutextchange<=1){
         ctx.fillStyle = "rgba(255, 255, 255, " + menuopacityleft + ")";
-        ctx.fillText("press left to play with your will", 205, 850);
+        ctx.fillText("press left for level one", 205, 800);
+        }else{
         ctx.fillStyle = "rgba(255, 255, 255, " + menuopacityright + ")";
-        ctx.fillText("press right to play with your mind", 1055, 850);
+        ctx.fillText("press right for level two", 205, 800);
+        }
 
     }else if(gamemode=="intro"){
         if(!introStarted){
@@ -548,59 +575,78 @@ function draw () {
                 }
             }else if(level==3){ // on hard level
                 if(sideNum==1){
-                    if(playerX>=1098 && playerX<=1105 && playerY<=667 && playerY>=664){
+                    if(playerX>=1160 && playerX<=1181 && playerY<=690 && playerY>=687){
+                        sideNum++;
+                        countFrame = seconds+2;
+                        actFrame = countFrame;
+                        videoPlayed = false;
+                        whichVideo = "onetotwolow";
+                        spawnpoint = 1;
+                        resetUsedVariables();
+                    } else if(playerX>=718 && playerX<=720 && playerY<=493 && playerY>=490){
+                        sideNum=4;
+                        countFrame = seconds+2;
+                        videoPlayed = false;
+                        whichVideo = "onetofour";
+                        spawnpoint = 6;
+                        resetUsedVariables();
+                    } else if(playerX>=1170 && playerX<=1172 && playerY<=593 && playerY>=590){
                         sideNum++;
                         countFrame = seconds+2;
                         actFrame = countFrame;
                         videoPlayed = false;
                         whichVideo = "onetotwo";
-                        spawnpoint = 1;
-                        resetUsedVariables();
-                    }else if(playerX>=723 && playerX<=729 && playerY<=725 && playerY>=722){
-                        sideNum=4;
-                        countFrame = seconds+2;
-                        actFrame = countFrame;
-                        videoPlayed = false;
-                        whichVideo = "onetofour";
                         spawnpoint = 5;
                         resetUsedVariables();
                     }
                 }else if(sideNum==2){
-                    if(playerX>=1097 && playerX<=1102 && playerY<=690 && playerY>=685){
-                        sideNum++;
-                        countFrame = seconds+2;
+                    if(playerX>=1153 && playerX<=1155 && playerY<=716 && playerY>=712){
+                        sideNum=4;
+                        countFrame = seconds+3;
                         videoPlayed = false;
-                        whichVideo = "twotothree";
-                        spawnpoint = 2;
+                        whichVideo = "twotofour";
+                        spawnpoint = 3;
                         resetUsedVariables();
-                    }else if(playerX>=723 && playerX<=729 && playerY<=460 && playerY>=455){
+                    } else if(playerX>=753 && playerX<=756 && playerY<=592 && playerY>=590){
                         sideNum--;
                         countFrame = seconds+2;
-                        actFrame = countFrame;
                         videoPlayed = false;
                         whichVideo = "twotoone";
                         spawnpoint = 4;
                         resetUsedVariables();
                     }
                 }else if(sideNum==3){
-                    if(playerX>=1095 && playerX<=1102 && playerY<=425 && playerY>=423){
-                        sideNum++;
+                    if(playerX>=712 && playerX<=714 && playerY<=452 && playerY>=450){
+                        sideNum--;
                         countFrame = seconds+2;
                         videoPlayed = false;
-                        whichVideo = "threetofour";
-                        spawnpoint = 3;
+                        whichVideo = "threetotwo";
+                        spawnpoint = 7;
                         resetUsedVariables();
                     }
                 }else if(sideNum==4){
                     if(playerX>=1078 && playerX<=1082 && playerY<=211 && playerY>=200){
                         gamemode="end";
-                    }else if(playerX>=722 && playerX<=726 && playerY<=687 && playerY>=684){
+                    } else if(playerX>=1114 && playerX<=1116 && playerY<=592 && playerY>=590){
+                        sideNum=1;
+                        countFrame = seconds+2;
+                        videoPlayed = false;
+                        whichVideo = "fourtoone";
+                        spawnpoint = 4;
+                        resetUsedVariables();
+                    } else if(playerX>=633 && playerX<=635 && playerY<=689 && playerY>=686){
                         sideNum--;
                         countFrame = seconds+2;
-                        actFrame = countFrame;
                         videoPlayed = false;
                         whichVideo = "fourtothree";
-                        spawnpoint = 6;
+                        spawnpoint = 2;
+                        resetUsedVariables();
+                    } else if(playerX>=633 && playerX<=635 && playerY<=632 && playerY>=629){
+                        sideNum=2;
+                        countFrame = seconds+3;
+                        videoPlayed = false;
+                        whichVideo = "fourtotwo";
+                        spawnpoint = 8;
                         resetUsedVariables();
                     }
                 }
@@ -650,10 +696,38 @@ function draw () {
                 img.src = "level2/images/end.jpg";
                 ctx.drawImage(img, 0, 0);
 
-                ctx.fillStyle = "#444444";
+                if(endtextchange==0){
+                    endopacityleft+=0.005;
+                    if(endopacityleft>=0.7)endtextchange=1;
+                }else if(endtextchange==1){
+                    endopacityleft-=0.005;
+                    if(endopacityleft<=0.005)endtextchange=2;
+                }else if(endtextchange==2){
+                    endopacityright+=0.005;
+                    if(endopacityright>=0.7)endtextchange=3;
+                }else if(endtextchange==3){
+                    endopacityright-=0.005;
+                    if(endopacityright<=0.005)endtextchange=0;
+                }
+
                 ctx.font = "normal 41px Roboto";
-                ctx.fillText("time: "+ Math.round(resultTime)+" seconds", 1185, 370);
-                ctx.fillText("lifes: "+ playerCounter, 1185, 435);
+                if(endtextchange<=1){
+                ctx.fillStyle = "rgba(0, 0, 0, " + endopacityleft + ")";
+                if(resultTime<=99){
+                    ctx.fillText(Math.round(resultTime)+" seconds", 1295, 412);
+                }else{
+                    ctx.fillText(Math.round(resultTime)+" seconds", 1303, 412);
+                }
+                }else{
+                ctx.fillStyle = "rgba(0, 0, 0, " + endopacityright + ")";
+                if(playerCounter==1){
+                    ctx.fillText(playerCounter+" life", 1355, 412);
+                }else if(playerCounter<=9){
+                    ctx.fillText(playerCounter+" lifes", 1345, 412);
+                }else{
+                    ctx.fillText(playerCounter+" lifes", 1340, 412);
+                }    
+                }
             }else{
                 if(endtomenu){
                     endtomenutime=seconds;
@@ -678,10 +752,39 @@ function draw () {
                 img.src = "level3/images/end.jpg";
                 ctx.drawImage(img, 0, 0);
 
-                ctx.fillStyle = "#444444";
+                if(endtextchange==0){
+                    endopacityleft+=0.005;
+                    if(endopacityleft>=0.7)endtextchange=1;
+                }else if(endtextchange==1){
+                    endopacityleft-=0.005;
+                    if(endopacityleft<=0.005)endtextchange=2;
+                }else if(endtextchange==2){
+                    endopacityright+=0.005;
+                    if(endopacityright>=0.7)endtextchange=3;
+                }else if(endtextchange==3){
+                    endopacityright-=0.005;
+                    if(endopacityright<=0.005)endtextchange=0;
+                }
+
                 ctx.font = "normal 41px Roboto";
-                ctx.fillText("time: "+ Math.round(resultTime)+" seconds", 1185, 370);
-                ctx.fillText("lifes: "+ playerCounter, 1185, 435);
+                if(endtextchange<=1){
+                ctx.fillStyle = "rgba(0, 0, 0, " + endopacityleft + ")";
+                if(resultTime<=99){
+                    ctx.fillText(Math.round(resultTime)+" seconds", 1295, 412);
+                }else{
+                    ctx.fillText(Math.round(resultTime)+" seconds", 1303, 412);
+                }
+                }else{
+                ctx.fillStyle = "rgba(0, 0, 0, " + endopacityright + ")";
+                if(playerCounter==1){
+                    ctx.fillText(playerCounter+" life", 1355, 412);
+                }else if(playerCounter<=9){
+                    ctx.fillText(playerCounter+" lifes", 1345, 412);
+                }else{
+                    ctx.fillText(playerCounter+" lifes", 1340, 412);
+                }  
+            }
+
             }else{
                 if(endtomenu){
                     endtomenutime=seconds;
@@ -728,43 +831,85 @@ function pick(event) {
 function keyInput(e) {
     e = e || window.event;
     if(gamemode=="menu"){
-        switch (e.keyCode) {
-            case 37: // left arrow
-                level = 1;
-                gamemode="intro";
-                break;
-            case 38: // arrow up
-                level = 3;
-                gamemode="intro";
-                break;
-            case 39: // right arrow
-                level = 2;
-                gamemode="intro";
-                break;
-            default: // if any key pressed start intro video
-                //console.log(e);
-                break;
+        if(presentationmode){ // if makey makey is used
+            switch (e.keyCode) {
+                case 40: // left arrow
+                    level = 3;
+                    gamemode="intro";
+                    break;
+                //case 37: // arrow up
+                //    level = 1;
+                //    gamemode="intro";
+                //    break;
+                case 38: // right arrow
+                    level = 2;
+                    gamemode="intro";
+                    break;
+                default:
+                    //console.log(e);
+                    break;
+            }
+        }else{
+            switch (e.keyCode) {
+                case 37: // left arrow
+                    level = 3;
+                    gamemode="intro";
+                    break;
+                case 38: // arrow up
+                    level = 1;
+                    gamemode="intro";
+                    break;
+                case 39: // right arrow
+                    level = 2;
+                    gamemode="intro";
+                    break;
+                default: // if any key pressed start intro video
+                    //console.log(e);
+                    break;
+            }
         }
     }else if(gamemode=="play" && videoPlayed==true){
         buttonPressed=true;
-        switch (e.keyCode) {
-            case 37: // left arrow
-                playDir = "a";
-                break;
-            case 38: // arrow up
-                playDir = "w";
-                break;
-            case 39: // right arrow
-                playDir = "d";
-                break;
-            case 40: // arrow down
-                playDir = "s";
-                break;
-            default:
-                sideNum = sideNum;
-                buttonPressed=true;
-                //console.log(e);
-                break;
+        if(presentationmode){
+            switch (e.keyCode) {
+                case 37: // left arrow
+                    playDir = "w";
+                    break;
+                case 38: // arrow up
+                    playDir = "d";
+                    break;
+                case 39: // right arrow
+                    playDir = "s";
+                    break;
+                case 40: // arrow down
+                    playDir = "a";
+                    break;
+                default:
+                    sideNum = sideNum;
+                    buttonPressed=true;
+                    //console.log(e);
+                    break;
+            }
+        }else{
+            switch (e.keyCode) {
+                case 37: // left arrow
+                    playDir = "a";
+                    break;
+                case 38: // arrow up
+                    playDir = "w";
+                    break;
+                case 39: // right arrow
+                    playDir = "d";
+                    break;
+                case 40: // arrow down
+                    playDir = "s";
+                    break;
+                default:
+                    sideNum = sideNum;
+                    buttonPressed=true;
+                    //console.log(e);
+                    break;
+            }
         }
     }else if(gamemode=="end" && endTime<=seconds){
         switch (e.keyCode) {

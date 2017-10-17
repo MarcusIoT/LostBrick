@@ -123,18 +123,24 @@ if(this.level==1){
             if(this.whichVideo == "onetotwo"){
                 this.ltwovideo12.play();
                 this.ctx.drawImage(ltwovideo12, 0, 0);
+            }else if(this.whichVideo == "onetotwolow"){
+                this.ltwovideo12low.play();
+                this.ctx.drawImage(ltwovideo12low, 0, 0);
             }else if(this.whichVideo == "twotoone"){
                 this.ltwovideo21.play();
                 this.ctx.drawImage(ltwovideo21, 0, 0);
-            }else if(this.whichVideo == "twotothree"){
-                this.ltwovideo23.play();
-                this.ctx.drawImage(ltwovideo23, 0, 0);
+            }else if(this.whichVideo == "twotofour"){
+                this.ltwovideo24.play();
+                this.ctx.drawImage(ltwovideo24, 0, 0);
             }else if(this.whichVideo == "threetofour"){
                 this.ltwovideo34.play();
                 this.ctx.drawImage(ltwovideo34, 0, 0);
             }else if(this.whichVideo == "fourtothree"){
                 this.ltwovideo43.play();
                 this.ctx.drawImage(ltwovideo43, 0, 0);
+            }else if(this.whichVideo == "fourtotwo"){
+                this.ltwovideo42.play();
+                this.ctx.drawImage(ltwovideo42, 0, 0);
             }else if(this.whichVideo == "threetotwo"){
                 this.ltwovideo32.play();
                 this.ctx.drawImage(ltwovideo32, 0, 0);
@@ -144,6 +150,9 @@ if(this.level==1){
             }else if(this.whichVideo == "onetofour"){
                 this.ltwovideo14.play();
                 this.ctx.drawImage(ltwovideo14, 0, 0);
+            }else if(this.whichVideo == "fourtoone"){
+                this.ltwovideo41.play();
+                this.ctx.drawImage(ltwovideo41, 0, 0);
             }
             if(this.countFrame<= this.seconds)this.videoPlayed = true;
         }
